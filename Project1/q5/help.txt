@@ -1,0 +1,31 @@
+$ cat README
+Perhaps we are asking the wrong questions.
+
+user: jz
+pass: @Y((K9Br
+$
+
+
+jz@pwnable:~$ cat README
+Welcome to the desert of the real.
+
+user: jones
+pass: 76_*sreU
+
+
+python arg > T
+invoke -d agent-brown
+>> b 14
+>> r < T $(cat T)
+
+invoke agent-brown $(cat T)
+$ whoami
+jz
+
+
+- When you run agent-jones on gdb, you should do something like
+invoke -d agent-jones
+(gdb) run 8888
+To feed in your egg, on another terminal, ssh into jones, run
+./egg | nc 127.0.0.1 8888
+Then look at the first terminal (it should be in gdb) 

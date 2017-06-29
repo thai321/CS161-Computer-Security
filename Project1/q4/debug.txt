@@ -1,0 +1,8 @@
+python arg > T
+invoke -d agent-brown
+>> b 14
+>> r < T $(cat T)
+
+invoke agent-brown $(cat T)
+$ whoami
+jz

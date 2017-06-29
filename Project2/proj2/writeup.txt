@@ -1,0 +1,38 @@
+
+1)
+What is the purpose of hashing and salting passwords, as opposed to just hashing
+passwords? How is this a more effective defense? 
+
+_The purpose of hashing and salting password is to defend against dictionary attacks and pre-computed rainbow table attacks.
+When a new salt is randomly generated from a password, it is attached to the password and processed with a cryptographic has function, which store the hash password and the salt in the database, and defense from hacking the database.
+Since the cryptographic hash function considered practically impossible to invert, the password is very difficult to hack if the attackers don't know the password.
+
+_As we can see for the rainbow tables, it is precomputed table for reversing cryptographic hash functions by using only hash password, but not the salt. Therefore, the rainbow tables allow hackers to reverse the hashing function to determine what the actual password.
+
+
+2)
+List an advantage and a disadvantage of blacklisting as compared to whitelisting as a
+form of XSS defense.
+
+_A advantage of blacklisting: it is conceptually simple to recognize a few bad things(virus, malware), stop them, and allow everything else.
+_A disadvantage of blacklisting: Very hard to capture the malicious string as we can see in the project, and it's not a good practice if it allows attacker to use an attribute from html form to perform an XSS attack
+
+
+3)
+If you poke around the XSS website we used in the second part of the project and
+execute some Javascript in the console, you can see that the website uses a session ID
+cookie to keep track of who's currently logged in. You can just write document.cookie
+in the console to confirm this. Are CSRF attacks with this site possible? How could
+we prevent them?
+
+Yes.
+To prevent it we need to generate session a new session token every time, don't save sessions in cookies, page needs 
+to validate token and same origin policy
+
+
+
+
+Give your supervisor the following IDs:
+Id		Areas
+77313	9.UCdd	60ad79beee0ab941e1f99e25dbe06026	Eshleman Hall ; LeConte Hall ; UC Press
+

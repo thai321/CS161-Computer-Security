@@ -1,0 +1,13 @@
+#! /usr/bin/env ruby
+server_pubkey = File.open('server_pubkey.pub').read
+
+0.upto(10000).map do |x|
+	`./generate_rsa_pair #{x}`
+	#puts x
+	public_key = File.open('q1_pubkey.pub').read
+	if server_pubkey == public_key
+		private_key = File.open('q1_privkey.priv').read
+		puts private_key
+		break
+	end
+end

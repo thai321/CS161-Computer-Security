@@ -1,0 +1,200 @@
+% Search for all the places that say "PUT SOMETHING HERE".
+
+\documentclass[11pt]{article}
+\usepackage{amsmath,textcomp,amssymb,geometry,graphicx,enumerate}
+
+\def\Name{Quoc Thai Nguyen Truong}  % Your name
+\def\SID{24547327}  % Your student ID number
+\def\Login{cs161-di} % Your login (your class account, cs170-xy)
+\def\Homework{1}%Number of Homework
+\def\Session{Spring 2015}
+
+
+\title{CS161--Spring 2015 --- Solutions to Homework \Homework}
+\author{\Name, SID \SID, \texttt{\Login}}
+\markboth{CS161--\Session\  Homework \Homework\ \Name}{CS161--\Session\ Homework \Homework\ \Name, \texttt{\Login}}
+\pagestyle{myheadings}
+
+\newenvironment{qparts}{\begin{enumerate}[{(}a{)}]}{\end{enumerate}}
+\def\endproofmark{$\Box$}
+\newenvironment{proof}{\par{\bf Proof}:}{\endproofmark\smallskip}
+
+\textheight=9in
+\textwidth=6.5in
+\topmargin=-.75in
+\oddsidemargin=0.25in
+\evensidemargin=0.25in
+
+\newcommand{\tab}{\hspace*{2em}}
+
+
+\begin{document}
+\maketitle
+
+Collaborators: God
+
+\section*{Problem 1}
+
+\begin{qparts}
+\item
+False\\
+In order to keep u secure, you have to keep your code and system secret.
+\item
+False\\
+format string bugs can be xploited for control-hijacking attacks by hackers.
+
+\item
+False\\
+I'm not sure about this. So I prayed, and "False" is my final answer :)
+
+\item
+False\\
+we can't prevents every attack, but not all of them. 
+\item
+False\\
+calling system() is a very bad way to run because it runs the default shell and passes your program as arguments. 
+
+\item
+False\\
+you can't guarantee a perfect program without a bug.
+
+
+
+\end{qparts}
+
+\newpage
+\section*{Problem 2}
+\begin{qparts}
+\item
+\boxed{Buggy} at line 5.\\
+At line 5, each memmove copies string of size(p) to p+2, so it can overflow 1 byte. Therefore, the number of bytes overflow is the number of "\textbackslash n" (newline character). Hence, attacker can inject shell-code into the buffer overflow and overwrite the return address, which can jump and execute the shell-code.
+
+\item
+\boxed{Not\ Buggy}\\
+
+
+\item
+\boxed{Buggy} at line 12.\\
+\\
+This is buffer overrun. If track = curcd$\rightarrow$numtracks, this can write past curcd$\rightarrow$tracklen array.\\
+If track = curcd$\rightarrow$numtracks, then I can make newtracklen be the address of same shell-code that lives somewhere in the memory.Therefore, we can see that this will overwrite curcd$\rightarrow$notify to some pointer of a shell-code.
+
+\end{qparts}
+\newpage
+\section*{Problem 3}
+
+\begin{qparts}
+\item
+$s1\ != NULL\ \&\&\ s2\ != NULL\ \&\&\ n1 <= size(s1)\ \&\&\ n_2\ <= size(s2)$
+
+\item
+$s1\ != NULL\ \&\&\ s\ != NULL\ \&\&\ i < size(s1)\ \&\&\ i\ < size(s)\ \&\&\ i>=0$
+
+\item
+$s2\ != NULL\ \&\&\ s\ != NULL\ \&\&\ j < size(s2)\ \&\&\ i+j\ < size(s)\ \&\&\ i+j>=0$
+
+\item
+$s\ != NULL\ \&\&\ i+j\ < size(s)\ \&\&\ i+j>=0$
+\end{qparts}
+
+
+\newpage
+\section*{Problem 4}
+
+\begin{qparts}
+\item
+Since it' $unit64\_t$, we know that each $memcpy()$ will write 8 Bytes.\\
+So if $i= 18$, it will past end of a.\\
+\tab + $i = 0 \rightarrow a[0\cdots 7]$\\
+\tab + $i = 1 \rightarrow a[1\cdots 8]$\\
+\tab + $i = 2 \rightarrow a[2\cdots 9]$\\
+\tab\tab $\cdots$\\
+\tab + $i = 18 \rightarrow a[18\cdots 25]$
+
+\item
+\boxed{Any\ Value\ that\ is\ greater\ or\ equal\ to\ 19}
+
+
+
+\end{qparts}
+
+\newpage
+\section*{Problem 5}
+
+\begin{qparts}
+\item
+%$\frac{1}{\frac{6}{2^{64}}} = \boxed{\frac{2^{64}}{6}}$
+%(2^64 - 6) *(1/7) +1
+$$\boxed{(2^{64}-6)\times\Big(\frac{1}{7}\Big) + 1}$$
+\item
+P = $(x_0 >= 0) \land (y_0 >= 0) \land (x_0 == 8) \land (y_0 <= 19)$
+\item
+Q = $(y_0 >= 0) \land (y_0 <= 13)$
+
+\item
+$(P \land \neg Q) = [(x_0 >= 0) \land (y_0 >= 0) \land (x_0 == 8) \land (y_0 <= 19)] \land [(y_0 < 0) \lor (y_0 > 13)]$\\
+$\boxed{(x_0 == 8) \land (14<= y_0<=19)}$
+\end{qparts}
+
+
+\newpage
+\section*{Problem 6}
+
+\begin{qparts}
+\item
+I would allow a certain (variable) number of miss-types, so that allow the users to access the system if their number of mis-types is less than or equals to the variable.
+
+\item
+If we allow a certain number of mis-types, the authorized users will have more more chances to log in. Hence, "False negative" will be decrease because because the authorized knows their passwords.\\
+Also, "False positive" will be increase because we allow mis-types in the passwords, so the unauthorized users will have more chances of hacking and logging in.\\
+\item
+
+Let x be the \# of errors that we will allow\\
+$$P(x\leq k)\geq 0.998$$
+$$\sum\limits_{i=0}^k P(x=i)$$
+$$\sum\limits_{i=0}^k \binom{10}{i}\cdot (98)^{10-i} \cdot (0.02)^2$$
+If the users make 2 or less typos, let them log-in to the system\\
+"False negative" rate $<$ 0.002\\
+"False positive" rate $=\frac{1}{2^{30}}$ 
+
+
+\end{qparts}
+
+\newpage
+\section*{Problem 7}
+
+\begin{qparts}
+\item
+1:\tab$xorl\ \%ecx\ \%ecx $\\
+2:\tab$addl\ \$42\ \%ecx $\\
+3:\tab$movl\ \%ecx\ \%eax $\\
+
+\item
+D: 2ef4f00d\tab(xchg \%eax \%ecx)\\
+C: 2ef4cafe\tab(addl \$42 \%ecx)\\
+B: 2ef4face\tab(xorl \%ecx \%ecx)\\
+A: Doesn't matter\\
+
+\item
+E: 0xbfdecaf0\tab(./a.out)\\
+D: 0xbfdecae0\tab(gcc /tmp/foo.c)\\
+C: 0x1ffa4b28\tab(System)\\
+B: 0x1ffa4b28\tab(System)\\
+A: doesn't matter
+
+
+\item
+H: 0xbfdecaf8\tab(rm a.out/tmp/foo.c)\\
+G: 0xbfdecaf0\tab(./a.out)\\
+F: 0x1ffa4b28\tab(System)\\
+E: 0x1ffa4b28\tab(System)\\
+D: 0xbfdecae0\tab(gcc /tmp/foo.c) \\
+C: 0x2ef4dead\tab(pop) \\
+B: 0x1ffa4b28\tab(System)\\
+A: doesn't matter
+
+
+\end{qparts}
+
+
+\end{document}

@@ -1,0 +1,24 @@
+a)
+	1: run “openssl req -nodes -newkey rsa:2048 -keyout email.priv -out email.req”
+	with Common Name (CN) = "email.gov-of-caltopia.info"
+	to create private key "email.priv" and certificate signing request "email.req"
+	
+	2: “cd digipwntar/“
+	 ./sign email.req email.x509 to sign the certificate
+
+	3: run “openssl x509 -in email.x509 -text”
+	to inspect and manipulate the certificate
+
+	4: Once creating the certificate, run wireshark on eth0 and get more informations about the DNS packets
+
+	5: look at the DNS packet, we can see that the governor's IP is "10.87.51.131" as the source, and his email's ip address (email.gov-of-caltopia.info) is 8.8.8.8, our eth0 local IP is 10.87.51.132.
+	In order to redirect the governor to our server, we only create and 
+	send DNS packet if we get DNS packet with source "10.87.51.131" and destination "8.8.8.8"
+	
+	6: We modified "pcap_tool.py" using scapy. Also, DNS primary use UDP ---> mesg = msg = ip / udp / dns
+
+	7: run "./pcap_tool.py", and "./local_webserver email.x509 email.priv"
+
+	8: The pass and user will be print on the terminal whenever the governor enter his user and password.
+
+b) One of the defenses is port randomization for DNS requests, or DNSSEC(which we didn't learn in this class). Source: http://en.wikipedia.org/wiki/DNS_spoofing

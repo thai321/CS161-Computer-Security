@@ -1,0 +1,7 @@
+a)
+1: Open Wrireshark ,Install the private key into Wireshark as the instruction in the spec (add new RSA private key to SSL protocol).
+2: Look for the plaintext and get the secret in the Get packet.
+
+b) TLS_RSA_WITH_AES_CBC_SHA; This is used for encryption. RSA is used to encrypt the Premaster Secret
+
+c) Use Diffie-Hellman exchange, since it makes it more difficult for the attacker to decrypt the message, since it allows the two parties to generate a shared secret key over an insecure channel. Diffie-Hellman should be used to exchange encrypted keys securely. So if I even found out the private key, it shouldn't work for a new session since the keys are temporarily newly generated each time for only that one session over the insecure channel. 

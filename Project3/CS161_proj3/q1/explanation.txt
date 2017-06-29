@@ -1,0 +1,12 @@
+a)
+	1: I determined the seed value by using the printf in seed_randomness function in generate_rea_pair.c file, I can see that the seed is between 0 to 10,000.
+
+	2: I rewrite seed_randomness which take a character, and create "run" written in ruby that loop between 0 to 1000 in order to generate rsa key correspond to each seed number. The "run" only output (print) a private key if and only if server public key is match to that public key's seed.
+
+	3: Open Wrireshark ,Install the private key into Wireshark as the instruction in the spec and add that RSA private key to SSL protocol
+
+	4: Start etho0 and look at the Get chat packet, and get the secret.
+
+b)
+Line number 148: "seed = time_micro_sec >> 7;" doesn't do what the comment say.
+Fixing this line would will make this key generation scheme be secure because it will increase the randomness of the seeds which will can prevent from attacker.

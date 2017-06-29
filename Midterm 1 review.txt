@@ -1,0 +1,108 @@
+	Security Analysis and Threat Model:
+_ Basic security properties: 
+	+ Availability 
+	+ integrity
+	+ confidentiality
+	CIA
+_Threat model:
+	A. We want perfect security
+	B. Security is about risk analysis and economics
+	Answer is B
+
+
+_Software Vulnerabilities:
+	+ Buffer overflow vulnerabilities and attacks
+	+ Integer overflow vulnerabilities and attacks
+	+ Format string vulnerabilities and attacks
+	+ Arc injection/ return-to-libc/ROP vulnerabilities and attacks
+	+ General control hijacking attacks
+
+
+_ General Control Hijacking
+ 		A = Control Flow Pointer: return address, frame pointer, function pointer as local variable, exception Handler, jump to address, long jmp pointer, function pointer in heap
+		A ----> Expected code
+		A  ----> Shellcode, library (return to libc)
+Overwrite Step: Find some way to modify a Control Flow Pointer to point to ur shell code, library entry point or other code of INTERNET
+Active:
+
+_ Stack and Format Strings:
+	_ Funciton behavior is controlled by the format string
+	_ Retrieves parameters from stack as requested: "%"
+	_Ex:
+		printf("Numbner %d has no address, number %d has: %08x\n", I, a, &a)
+		A: address of the format string
+		i: value of variable I
+		a: value of variable a
+		&a: Address of variable a
+
+_SW vuln. Defenses:
+	+ Non-execute (NX): 
+		_prevent code injection in stack and heap
+		_ There is a non-execute part in the page table. If it is modified, then system shuts down
+
+	+ Stack canaries: 
+		_ Insert a random value before calling a function, and then check if that value is the same.
+		If same, then nothing was changed, and no attack was performed, else attack happened
+		_ protects against code injection in stack
+		_ protects against control hijacking
+		_ protects return address
+		_ cannot protect items in heap (i.e local variables in a function)
+	+ ASLR:
+		_ Randomizing stack layout (Address Space layout Randomization)
+		_ Prevents stack smashing
+
+
+	+ Bounds check: to Make sure that a number is within the bound
+		_ Integer overflow can still happened
+
+	+ Which defenses are effective against what attacks?
+
+_ Fuzzing:
+	+ Random fuzzing
+	+ Mutation-based fuzzing
+	+ Generation-based fuzzing
+	+ code coverage: line, branch and coverage
+
+Quiz:
+if (a> 2)
+	a = 2;
+if (b > 2)
+	b = 2;
+lines: 1
+branches: 2
+path: 4
+4 test cases.
+
+_Completeness of coverage Metrics:
+
+my_copy)char*, dst, char* src) {
+	if (dst && src):
+		strcpy(dst, src);
+}
+
+Which of the following coverage results guarantee the bug will be found?
+a. 100% line coverage
+b. 100% branch coverage
+c. 100% path coverage
+d. None of the above <---- Answer
+
+
+_  Symbolic Execution:
+	+ Path perdicates
+	+ Security vulnerality
+
+Topics Covered in Midterm 2
+	+ Static analysis
+	+ Program Verification
+	+ Security principles and architectures
+	+ Malware
+	+ Other topics after midterm 2
+
+
+
+
+
+
+
+
+

